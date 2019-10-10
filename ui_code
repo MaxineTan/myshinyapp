@@ -1,0 +1,39 @@
+library(shiny)
+
+# Define UI for application that draws a histogram
+shinyUI(fluidPage(
+
+    # Application title
+    titlePanel("Gender analysis of survivers in Titanic"),
+
+    # Sidebar with four options
+    sidebarLayout(
+        sidebarPanel(
+            fileInput("csvfile", "Choose your CSV file:",
+                      accept = c("text/csv", 
+                                 "text/comma-separated-values, text/plain",
+                                 ".csv")),
+
+            selectInput("class", "Choose class for the passengers' seats:", 
+                        choices = c("1st" = 1, "2nd" = 2, "3rd" = 3),
+                        selected = "1st"),
+            
+            selectInput("survive", "Survived or not:",
+                        choices = c("Yes" = 1, "No" = 0), selected = "No"),
+            helpText("Note: When using the regression function below, the selection of Survival will have no impacts 
+                     because it is the dependent variable of the regression."),
+            checkboxInput("reg", "Run a regression", value = TRUE)
+            
+            ), # 4 options in sidebarpanel ENDS HERE#######
+
+        # Show summary and data visualization of the sex ratio
+        mainPanel(
+            # make two tabs for different info
+            tabsetPanel(type = "tabs",
+                        tabPanel("Summary", verbatimTextOutput("summary")),
+                        tabPanel("Plot", plotOutput("piechart")),
+                        tabPanel("Logistic Regression", plotOutput("regression"))
+                        )
+        )
+    )
+))
