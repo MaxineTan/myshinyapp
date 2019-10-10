@@ -1,0 +1,58 @@
+library(dplyr)
+library(shiny)
+library(ggplot2)
+
+# Define server logic 
+shinyServer(function(input, output) {
+
+    output$summary <- renderPrint({
+        data = input$csvfile
+        dataPath = data$datapath[1]
+        if (!is.null(dataPath)){
+            t = read.csv(dataPath)
+            t = tbl_df(t)
+            
+            t_df <- t %>% filter(Pclass == input$class) %>% filter(Survived == input$survive) %>% filter(!is.null(Age))
+            summary(t_df[5:6])
+            #t_df
+        }
+        else {}
+    })
+    
+    output$piechart <- renderPlot({
+        data = input$csvfile
+        dataPath = data$datapath[1]
+        if (!is.null(dataPath)){
+            t = read.csv(dataPath)
+            t = tbl_df(t)
+            
+            t_df <- t %>% filter(Pclass == input$class) %>% filter(Survived == input$survive) %>% filter(!is.null(Age))
+            ggplot(data = t_df, aes(x = "", y = Sex, fill = Sex)) + geom_bar(stat = "identity") +
+                coord_polar(theta = "y")
+        }
+        else {}
+    })
+    
+    output$regression <- renderPlot({
+        data = input$csvfile
+        dataPath = data$datapath[1]
+        if (input$reg == TRUE) {
+            if (!is.null(dataPath)) {
+                t = read.csv(dataPath)
+                t = tbl_df(t)
+                t <- transform(t, Male = 1)
+                t$Male[t$Sex == "female"] <- 0
+                t_df <- t %>% filter(Pclass == input$class) %>% filter(!is.null(Age))
+                
+                
+                #reg1 <- glm(formula = Survived ~ Male, data = t_df)
+                ggplot(data = t_df, mapping = aes(x = Male, y = Survived)) +
+                    geom_point() + stat_smooth(method = "glm", family = "binomial", se = FALSE) +
+                    labs(title = "Logistic regression: Survival vs Sex", x = "Being a male", y = "Probability of survival")
+            }
+            else{}
+        }
+        else{}
+    })
+
+})
